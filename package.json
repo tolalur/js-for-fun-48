@@ -4,7 +4,7 @@
   "description": "",
   "main": "app.js",
   "scripts": {
-    "start": "ts-node inline-bot.ts",
+    "start": "ts-node html-bot.ts",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
