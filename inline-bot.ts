@@ -3,7 +3,7 @@ import Telegraf from 'telegraf';
 import Markup from 'telegraf/markup';
 import fetch from 'node-fetch';
 
-const bot = new Telegraf(process.env.BOT_TOKEN)
+const bot = new Telegraf('414766630:AAFIiCodXtCIFsC36vv9r96obnZw1rhc53c');
 
 bot.on('inline_query', async ({ inlineQuery, answerInlineQuery }) => {
   const apiUrl = `http://recipepuppy.com/api/?q=${inlineQuery.query}`
