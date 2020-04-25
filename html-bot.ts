@@ -6,4 +6,5 @@ bot.on('text', ({ replyWithHTML }) => replyWithHTML(
     `
     Aleksey completed a task in <a href="https://app.asana.com/0/1172081950609769/list|Project X">task</a>
 `
-))
+));
+bot.launch();
