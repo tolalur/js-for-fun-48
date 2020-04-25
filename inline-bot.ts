@@ -1,6 +1,7 @@
-const Telegraf = require('telegraf')
-const Markup = require('telegraf/markup')
-const fetch = require('node-fetch')
+
+import Telegraf from 'telegraf';
+import Markup from 'telegraf/markup';
+import fetch from 'node-fetch';
 
 const bot = new Telegraf(process.env.BOT_TOKEN)
 
