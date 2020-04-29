@@ -18,12 +18,12 @@ const prepareMessagesForTelegrm = (data: Message[]) => {
 const main = async () => {
     if (lastMessageId) {
         messages = await getMessages(messageFromUrl(lastMessageId)).then(res => res.data);
-        console.log(messages && messages.ok && messages.messages.length)
+        console.log('есть lastMessageId: ', messages && messages.ok && messages.messages.length)
     } else {
         messages = await getMessages(allMessageUrl).then(res => res.data);
         fs.writeFile(lastMessageIdFileName, messages.messages[0].ts, { encoding: "utf8" }, (e) => console.log)
     }
-    if (messages && messages.ok && messages.messages.length) {
+    if (messages && messages.ok && messages.messages && messages.messages.length) {
         console.log(prepareMessagesForTelegrm(messages.messages));
 
         let data = prepareMessagesForTelegrm(messages.messages);
@@ -34,6 +34,8 @@ const main = async () => {
         await Promise.all(data.map(d => telegram.sendMessage('-1001498144190', text(d))))
 
         // telegram.sendMessage('-1001498144190')
+    } else {
+        console.log("Не удалось загрузить сообщения")
     }
 };
 
