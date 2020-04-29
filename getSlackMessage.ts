@@ -21,9 +21,10 @@ const main = async () => {
         console.log('есть lastMessageId: ', messages && messages.ok && messages.messages.length)
     } else {
         messages = await getMessages(allMessageUrl).then(res => res.data);
-        fs.writeFile(lastMessageIdFileName, messages.messages[0].ts, { encoding: "utf8" }, (e) => console.log)
+        console.log(messages);
     }
     if (messages && messages.ok && messages.messages && messages.messages.length) {
+        fs.writeFile(lastMessageIdFileName, messages.messages[0].ts, { encoding: "utf8" }, (e) => console.log)
         console.log(prepareMessagesForTelegrm(messages.messages));
 
         let data = prepareMessagesForTelegrm(messages.messages);
