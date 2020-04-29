@@ -36,8 +36,8 @@ const main = async () => {
 
         // telegram.sendMessage('-1001498144190')
     } else {
-        console.log("Не удалось загрузить сообщения");
-        telegram.sendMessage('-1001498144190', 'Похоже пидоры из слака, заблочили интеграцию... ' + JSON.stringify(messages))
+        console.log(`Не удалось загрузить сообщения ${JSON.stringify(messages)}`,);
+        telegram.sendMessage('-1001498144190', `Похоже пидоры из слака, заблочили интеграцию... ${JSON.stringify(messages)}`)
     }
 };
 
