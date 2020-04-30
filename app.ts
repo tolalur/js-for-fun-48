@@ -12,7 +12,8 @@ const lastMessageIdFileName = 'lastMessageId.txt';
 const lastMessageId: string = fs.readFileSync(lastMessageIdFileName, "utf8");
 let messages: SlackAnswer;
 const prepareMessagesForTelegrm = (data: Message[]) => {
-    return data.map(m => ({ text: m.text, taskName: m.attachments[0].title, url: m.attachments[0].actions[0].url }))
+    return data.filter(m => m.bot_id && m.bot_id == 'B012HFLTUH1')
+        .map(m => ({ text: m.text, taskName: m.attachments[0].title, url: m.attachments[0].actions[0].url }))
 }
 
 const main = async () => {
