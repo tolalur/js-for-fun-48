@@ -3,10 +3,10 @@ import axios from 'axios';
 import { SlackAnswer, Message } from 'types/slack-answer';
 import * as Telegram from 'telegraf/telegram';
 
-
+const slackToken = 'xoxb-609373066404-1084068762981-2ADKUauwrtSaBWStqiB27vee';
 const telegram = new Telegram('414766630:AAFIiCodXtCIFsC36vv9r96obnZw1rhc53c');
-const allMessageUrl = 'https://slack.com/api/conversations.history?token=xoxb-609373066404-1084068762981-t9L8pWWLZbRfrl1p4CKfFoB2&channel=C012VTU8DFT';
-const messageFromUrl = (id: string) => `https://slack.com/api/conversations.history?token=xoxb-609373066404-1084068762981-t9L8pWWLZbRfrl1p4CKfFoB2&channel=C012VTU8DFT&oldest=${id}`;
+const allMessageUrl = `https://slack.com/api/conversations.history?token=${slackToken}&channel=C012VTU8DFT`;
+const messageFromUrl = (id: string) => `https://slack.com/api/conversations.history?token=${slackToken}&channel=C012VTU8DFT&oldest=${id}`;
 const getMessages = async (url: string) => axios.get(url);
 const lastMessageIdFileName = 'lastMessageId.txt';
 const lastMessageId: string = fs.readFileSync(lastMessageIdFileName, "utf8");
