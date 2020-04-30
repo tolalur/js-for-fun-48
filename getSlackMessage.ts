@@ -2,9 +2,10 @@ import * as fs from 'fs';
 import axios from 'axios';
 import { SlackAnswer, Message } from 'types/slack-answer';
 import * as Telegram from 'telegraf/telegram';
+import slackToken from 'slack-token';
+import telegaToken from 'telega-token';
 
-const slackToken = 'xoxb-609373066404-1084068762981-2ADKUauwrtSaBWStqiB27vee';
-const telegram = new Telegram('414766630:AAFIiCodXtCIFsC36vv9r96obnZw1rhc53c');
+const telegram = new Telegram(telegaToken);
 const allMessageUrl = `https://slack.com/api/conversations.history?token=${slackToken}&channel=C012VTU8DFT`;
 const messageFromUrl = (id: string) => `https://slack.com/api/conversations.history?token=${slackToken}&channel=C012VTU8DFT&oldest=${id}`;
 const getMessages = async (url: string) => axios.get(url);
@@ -33,8 +34,6 @@ const main = async () => {
         Задачка-хуячка: <a href="${data.url}">${data.taskName}</a>`
         console.log(text(data[0]));
         await Promise.all(data.map(d => telegram.sendMessage('-1001498144190', text(d))))
-
-        // telegram.sendMessage('-1001498144190')
     } else {
         console.log(`Не удалось загрузить сообщения ${JSON.stringify(messages)}`,);
         telegram.sendMessage('-1001498144190', `Похоже пидоры из слака, заблочили интеграцию... ${JSON.stringify(messages)}`)
