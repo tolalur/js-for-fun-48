@@ -34,7 +34,7 @@ const main = async () => {
         let data = prepareMessagesForTelegrm(messages.messages);
         const text = (data: { text: string, taskName: string, url: string }) => `
         Вам телега, господа: <b>${data.text}</b>
-        <code>Задачка-хуячка:</code> <a href="${data.url}">${data.taskName}</a>`
+<code>Задачка-хуячка:</code> <a href="${data.url}">${data.taskName}</a>`
         console.log(text(data[0]));
         await Promise.all(data.map(d => telegram.sendMessage('-1001498144190', text(d), { parse_mode: 'HTML' })))
     } else {
