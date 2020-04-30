@@ -16,7 +16,7 @@ const prepareMessagesForTelegrm = (data: Message[]) => {
         && m.attachments && m.attachments.length && m.attachments[0].title
         && m.attachments[0].actions && m.attachments[0].actions.length && m.attachments[0].actions[0].url
     )
-        .map(m => ({ text: m.text, taskName: m.attachments[0].title, url: m.attachments[0].actions[0].url }))
+        .map(m => ({ text: m.text.replace(/<https:\/\/|>/gm, ''), taskName: m.attachments[0].title, url: m.attachments[0].actions[0].url }))
 }
 
 const main = async () => {
