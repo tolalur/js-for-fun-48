@@ -69,7 +69,7 @@ const main = async (slackChannel: string, slackToken: string, lastMessageIdAdres
   }
 
   if (messages && messages.ok && messages.messages && !messages.messages.length) {
-    console.log('Новых сообщений нет, проект: ', slackChannel);
+    console.log('Новых сообщений нет, проект: ', lastMessageIdAdress);
   }
 
   if (messages && !messages.ok) {
