@@ -60,7 +60,8 @@ const main = async (slackChannel: string, slackToken: string, lastMessageIdAdres
     const text = (data: { text: string, taskName: string, url: string }) => `<b>${data.text}</b>\n<code>Задачка-хуячка:</code> <a href="${data.url}">${data.taskName}</a>`
 
     try {
-      await telegram.sendMessage('-1001498144190', 'Вам телега, господа:\n' + data.map(t => text(t)).join('\n\n'), { parse_mode: 'HTML' })
+      await telegram.sendMessage('-1001498144190', 'Вам телега, господа:\n' + data.map(t => text(t)).join('\n\n'), { parse_mode: 'HTML' });
+      await axios.post(lastMessageIdAdress, { messageId: messages.messages[0].ts })
     } catch (e) {
       console.log('отвалились при отправке сообщений в телегу', e)
     }
@@ -76,7 +77,6 @@ const main = async (slackChannel: string, slackToken: string, lastMessageIdAdres
 
     try {
       await telegram.sendMessage('-1001498144190', `Похоже пидоры из слака, заблочили интеграцию... ${JSON.stringify(messages)}`);
-      await axios.post(lastMessageIdAdress, { messageId: messages.messages[0].ts })
     } catch (e) {
       console.log('Отвалились на отправке сообщений в телегу');
       console.warn(e)
