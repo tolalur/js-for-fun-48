@@ -28,13 +28,28 @@ const prepareMessagesForTelegrm = (data: Message[]) => {
 
 const main = async (slackChannel: string, slackToken: string, lastMessageIdAdress: string) => {
     let messages: SlackAnswer;
-    const lastMessageId: string = await axios.get<{ messageId: string }>(lastMessageIdAdress).then(res => res.data.messageId)
+    let lastMessageId: string
+
+    try {
+        lastMessageId = await axios.get<{ messageId: string }>(lastMessageIdAdress).then(res => res.data.messageId)
+    } catch (e) {
+        console.log('отвалились при запросе id сообщения', e)
+    }
 
     if (lastMessageId) {
-        messages = await getMessages(messageFromUrl(lastMessageId, slackChannel, slackToken)).then(res => res.data);
+        try {
+            messages = await getMessages(messageFromUrl(lastMessageId, slackChannel, slackToken)).then(res => res.data);
+        } catch (e) {
+            console.log('отвалились при запросе сообщений', e)
+        }
+
         console.log('есть lastMessageId: ', messages && messages.ok && messages.messages.length)
     } else {
-        messages = await getMessages(allMessageUrl(slackToken, slackChannel)).then(res => res.data);
+        try {
+            messages = await getMessages(allMessageUrl(slackToken, slackChannel)).then(res => res.data);
+        } catch (e) {
+            console.log('отвалились при запросе сообщений', e)
+        }
     }
 
     if (messages && messages.ok && messages.messages && messages.messages.length) {
@@ -45,7 +60,13 @@ const main = async (slackChannel: string, slackToken: string, lastMessageIdAdres
         const text = (data: { text: string, taskName: string, url: string }) => `
         Вам телега, господа: <b>${data.text}</b>\n<code>Задачка-хуячка:</code> <a href="${data.url}">${data.taskName}</a>`
         console.log(text(data[0]));
-        await Promise.all(data.map(d => telegram.sendMessage('-1001498144190', text(d), { parse_mode: 'HTML' })))
+
+        try {
+            await Promise.all(data.map(d => telegram.sendMessage('-1001498144190', text(d), { parse_mode: 'HTML' })))
+        } catch (e) {
+            console.log('отвалились при отправке сообщений в телегу', e)
+        }
+
     } else {
         console.log(`Не удалось загрузить сообщения ${JSON.stringify(messages)}`);
         telegram.sendMessage('-1001498144190', `Похоже пидоры из слака, заблочили интеграцию... ${JSON.stringify(messages)}`)
