@@ -11,7 +11,9 @@ const allMessageUrl = (token: string, channel: string) => `https://slack.com/api
 
 const messageFromUrl = (lastMessageid: string, slackChannel: string, token: string) => `https://slack.com/api/conversations.history?token=${token}&channel=${slackChannel}&oldest=${lastMessageid}`;
 
-const getMessages = async (url: string) => axios.get(url);
+const getMessages = async (lastMessageId: string, slackChannel: string, slackToken: string) => axios.get(
+    lastMessageId ? messageFromUrl(lastMessageId, slackChannel, slackToken) : allMessageUrl(slackToken, slackChannel)
+);
 
 const prepareMessagesForTelegrm = (data: Message[]) => {
     return data.filter(m => m.bot_id && m.bot_id == 'B012HFLTUH1'
@@ -26,51 +28,64 @@ const prepareMessagesForTelegrm = (data: Message[]) => {
         )
 }
 
+function CustomException(message: string, e: ExceptionInformation) {
+    this.message = message;
+    this.originalException = e
+
+    this.toString = function () {
+        return this.message + this.originalException
+    };
+}
+
 const main = async (slackChannel: string, slackToken: string, lastMessageIdAdress: string) => {
     let messages: SlackAnswer;
     let lastMessageId: string
 
     try {
-        lastMessageId = await axios.get<{ messageId: string }>(lastMessageIdAdress).then(res => res.data.messageId)
+        lastMessageId = await axios.get<{ messageId: string }>(lastMessageIdAdress)
+            .then(res => res.data.messageId)
+            .catch(e => { throw CustomException('отвалились при запросе id сообщения', e) });
+
+        messages = await getMessages(lastMessageId, slackChannel, slackToken)
+            .then(res => res.data)
+            .catch(e => { throw CustomException('отвалились при запросе сообщений', e) });
+
+    } catch (e) { return console.log(e)}
+
+
+if (messages && messages.ok && messages.messages && messages.messages.length) {
+
+    await axios.post(lastMessageIdAdress, { messageId: messages.messages[0].ts })
+
+    let data = prepareMessagesForTelegrm(messages.messages);
+
+    const text = (data: { text: string, taskName: string, url: string }) =>
+        `Вам телега, господа: <b>${data.text}</b>\n<code>Задачка-хуячка:</code> <a href="${data.url}">${data.taskName}</a>`
+
+    console.log(text(data[0]));
+
+    try {
+        await Promise.all(data.map(d => telegram.sendMessage('-1001498144190', text(d), { parse_mode: 'HTML' })))
     } catch (e) {
-        console.log('отвалились при запросе id сообщения', e)
+        console.log('отвалились при отправке сообщений в телегу', e)
     }
 
-    if (lastMessageId) {
-        try {
-            messages = await getMessages(messageFromUrl(lastMessageId, slackChannel, slackToken)).then(res => res.data);
-        } catch (e) {
-            console.log('отвалились при запросе сообщений', e)
-        }
+}
 
-        console.log('есть lastMessageId: ', messages && messages.ok && messages.messages.length)
-    } else {
-        try {
-            messages = await getMessages(allMessageUrl(slackToken, slackChannel)).then(res => res.data);
-        } catch (e) {
-            console.log('отвалились при запросе сообщений', e)
-        }
-    }
+if (messages && messages.ok && messages.messages && !messages.messages.length) {
+    console.log('Новых сообщений нет, проект: ', slackChannel);
+}
 
-    if (messages && messages.ok && messages.messages && messages.messages.length) {
-
-        await axios.post(lastMessageIdAdress, { messageId: messages.messages[0].ts })
-
-        let data = prepareMessagesForTelegrm(messages.messages);
-        const text = (data: { text: string, taskName: string, url: string }) => `
-        Вам телега, господа: <b>${data.text}</b>\n<code>Задачка-хуячка:</code> <a href="${data.url}">${data.taskName}</a>`
-        console.log(text(data[0]));
-
-        try {
-            await Promise.all(data.map(d => telegram.sendMessage('-1001498144190', text(d), { parse_mode: 'HTML' })))
-        } catch (e) {
-            console.log('отвалились при отправке сообщений в телегу', e)
-        }
-
-    } else {
-        console.log(`Не удалось загрузить сообщения ${JSON.stringify(messages)}`);
+if (messages && !messages.ok) {
+    console.log(`Не удалось загрузить сообщения ${JSON.stringify(messages)}`);
+    
+    try {
         telegram.sendMessage('-1001498144190', `Похоже пидоры из слака, заблочили интеграцию... ${JSON.stringify(messages)}`)
+    } catch (e) {
+        console.log('Отвалились на отправке сообщений в телегу');
+        console.warn(e)
     }
+}
 };
 
 main(SlackChannel.projectX, Tokens.slack, 'http://localhost:3000/project-x');
