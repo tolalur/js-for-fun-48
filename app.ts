@@ -7,7 +7,7 @@ import SlackChannel from './slackChannel';
 
 const telegram = new Telegram(Tokens.telega);
 
-const allMessageUrl = (token: string, channel:string) => `https://slack.com/api/conversations.history?token=${token}&channel=${channel}`;
+const allMessageUrl = (token: string, channel: string) => `https://slack.com/api/conversations.history?token=${token}&channel=${channel}`;
 
 const messageFromUrl = (lastMessageid: string, slackChannel: string, token: string) => `https://slack.com/api/conversations.history?token=${token}&channel=${slackChannel}&oldest=${lastMessageid}`;
 
@@ -18,16 +18,17 @@ const prepareMessagesForTelegrm = (data: Message[]) => {
         && m.attachments && m.attachments.length && m.attachments[0].title
         && m.attachments[0].actions && m.attachments[0].actions.length && m.attachments[0].actions[0].url
     )
-        .map(m => ({ 
-            text: m.text.replace(/<https:\/\/|>/gm, '').replace(/app\.asana\.com(\/\d\/\d*\/)|(\d*\/\w\|)|(\w*\|)/gi, ''), 
-            taskName: m.attachments[0].title, 
-            url: m.attachments[0].actions[0].url })
-            )
+        .map(m => ({
+            text: m.text.replace(/<https:\/\/|>/gm, '').replace(/app\.asana\.com(\/\d\/\d*\/)|(\d*\/\w\|)|(\w*\|)/gi, ''),
+            taskName: m.attachments[0].title,
+            url: m.attachments[0].actions[0].url
+        })
+        )
 }
 
-const main = async (slackChannel: string, slackToken: string, lastMessageIdFileName: string) => {
+const main = async (slackChannel: string, slackToken: string, lastMessageIdAdress: string) => {
     let messages: SlackAnswer;
-    const lastMessageId: string = fs.readFileSync(lastMessageIdFileName, "utf8");
+    const lastMessageId: string = await axios.get<{ messageId: string }>(lastMessageIdAdress).then(res => res.data.messageId)
 
     if (lastMessageId) {
         messages = await getMessages(messageFromUrl(lastMessageId, slackChannel, slackToken)).then(res => res.data);
@@ -37,7 +38,8 @@ const main = async (slackChannel: string, slackToken: string, lastMessageIdFileN
     }
 
     if (messages && messages.ok && messages.messages && messages.messages.length) {
-        fs.writeFile(lastMessageIdFileName, messages.messages[0].ts, { encoding: "utf8" }, (e) => console.log)
+
+        await axios.post(lastMessageIdAdress, { messageId: messages.messages[0].ts })
 
         let data = prepareMessagesForTelegrm(messages.messages);
         const text = (data: { text: string, taskName: string, url: string }) => `
@@ -50,5 +52,5 @@ const main = async (slackChannel: string, slackToken: string, lastMessageIdFileN
     }
 };
 
-main(SlackChannel.projectX, Tokens.slack, 'lastMessageIdProjectX.txt');
-main(SlackChannel.boroda, Tokens.slack, 'lastMessageIdBoroda.txt');
+main(SlackChannel.projectX, Tokens.slack, 'http://localhost:3000/"project-x');
+main(SlackChannel.boroda, Tokens.slack, 'http://localhost:3000/boroda');
