@@ -73,5 +73,5 @@ const main = async (slackChannel: string, slackToken: string, lastMessageIdAdres
     }
 };
 
-main(SlackChannel.projectX, Tokens.slack, 'http://localhost:3000/"project-x');
+main(SlackChannel.projectX, Tokens.slack, 'http://localhost:3000/project-x');
 main(SlackChannel.boroda, Tokens.slack, 'http://localhost:3000/boroda');
